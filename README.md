@@ -11,30 +11,25 @@ Through **time-based prompts**, Echoes connects your past milestones with new ch
 ### 1. **Time-Based Prompts**
 Revisit past reflections and receive prompts tailored to those moments. Echoes encourages you to reflect on how you’ve grown and what has changed.
 
-![Screenshot: Time-Based Prompt](https://via.placeholder.com/712x400.png)
+![Screenshot: Time-Based Prompt](/images/Screenshot%202024-11-16%20224637.png)
 
 ---
 
 ### 2. **Personalized Challenges**
 Set goals and aspirations, and Echoes will periodically check in with you, nudging you to explore your progress and redefine your path.
 
-![Screenshot: Personalized Challenges](https://via.placeholder.com/712x400.png)
+![Screenshot: Personalized Challenges](/images/Screenshot%202024-11-16%20224713.png)
 
 ---
 
 ### 3. **Milestone Connections**
 Automatically highlights significant milestones and crafts questions that encourage deep reflection, helping you see the bigger picture of your personal growth.
 
-![Screenshot: Milestone Connections](https://via.placeholder.com/712x400.png)
+![Screenshot: Milestone Connections](/images/Screenshot%202024-11-16%20224734.png)
 
 ---
 
-### 4. **Narrative Builder**
-Echoes weaves a narrative from your entries, turning your journaling practice into an engaging story of your evolving self.
 
-![Screenshot: Narrative Overview](https://via.placeholder.com/712x400.png)
-
----
 
 ## 🚀 How It Works
 
@@ -64,7 +59,7 @@ Echoes weaves a narrative from your entries, turning your journaling practice in
 
 Rediscover yourself through the power of reflective journaling with **Echoes**. Join the community of users who are transforming their self-discovery journey into an ongoing conversation with their past selves.
 
-![Screenshot: Echoes Dashboard](https://via.placeholder.com/712x400.png)
+
 
 ---
 
