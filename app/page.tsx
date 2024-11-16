@@ -57,7 +57,7 @@ interface Milestone {
 type Path = 'personal' | 'career' | 'health' | 'creativity';
 
 const GrowthTracker: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<string>('reflections');
+  //const [activeTab, setActiveTab] = useState<string>('reflections');
   const [reflections, setReflections] = useState<Reflection[]>([]);
   const [milestones, setMilestones] = useState<Milestone[]>([]);
   const [loading, setLoading] = useState<LoadingState>({
