@@ -93,11 +93,11 @@ const GrowthTracker: React.FC = () => {
         //const userId = '507f191e810c19729de860ea';
         
         // Fetch progress analytics
-        //const progressResponse = await fetch(`http://localhost:5000/api/analytics/progress/${userId}`);
+        //const progressResponse = await fetch(`https://silicon-backend.onrender.com/api/analytics/progress/${userId}`);
         //const progressData = await progressResponse.json();
 
         // Fetch path recommendations
-      //  const recommendationsResponse = await fetch(`http://localhost:5000/api/recommendations/paths/${userId}`);
+      //  const recommendationsResponse = await fetch(`https://silicon-backend.onrender.com/api/recommendations/paths/${userId}`);
        //// const recommendationsData = await recommendationsResponse.json();
 
        
@@ -125,7 +125,7 @@ const GrowthTracker: React.FC = () => {
     };
 
     try {
-      const response = await fetch('http://localhost:5000/api/reflections', {
+      const response = await fetch('https://silicon-backend.onrender.com/api/reflections', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(reflection),
@@ -161,7 +161,7 @@ const GrowthTracker: React.FC = () => {
     };
 
     try {
-      const response = await fetch('http://localhost:5000/api/milestones', {
+      const response = await fetch('https://silicon-backend.onrender.com/api/milestones', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(milestone),
