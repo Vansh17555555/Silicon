@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar, Loader2, TrendingUp, AlertTriangle,Target } from 'lucide-react';
+import { Calendar, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription ,} from '@/components/ui/alert';
 
 // Types and Interfaces
@@ -60,31 +60,17 @@ interface Milestone {
 type Path = 'personal' | 'career' | 'health' | 'creativity';
 
 // Define the Insights type
-interface Insights {
-  progress: any; // Replace 'any' with the actual type if known
-  recommendations: any; // Replace 'any' with the actual type if known
-  metrics: { [key: string]: number };
-  analysis?: { growthTrends?: string[] };
-}
+ // Replace 'any' with the actual type if known
 
-const progressColors = ['#4caf50', '#2196f3', '#ff9800', '#f44336']; // Define your color array
+
+//const progressColors = ['#4caf50', '#2196f3', '#ff9800', '#f44336']; // Define your color array
 
 const GrowthTracker: React.FC = () => {
-  const ProgressBar: React.FC<{ path: string; progress: number; color: string }> = ({ path, progress, color }) => {
-    return (
-      <div className="w-full bg-gray-200 rounded-full">
-        <div
-          className="h-2 rounded-full"
-          style={{ width: `${progress}%`, backgroundColor: color }}
-        />
-      </div>
-    );
-  };
+
   //const [activeTab, setActiveTab] = useState<string>('reflections');
   const [reflections, setReflections] = useState<Reflection[]>([]);
   const [milestones, setMilestones] = useState<Milestone[]>([]);
-  const [insights, setInsights] = useState<Insights | null>(null);
- 
+  
   const [loading, setLoading] = useState<LoadingState>({
     reflection: false,
     milestone: false
@@ -104,21 +90,17 @@ const GrowthTracker: React.FC = () => {
     const fetchInsights = async () => {
       try {
         // Hardcoded user ID - replace with actual authentication
-        const userId = '507f191e810c19729de860ea';
+        //const userId = '507f191e810c19729de860ea';
         
         // Fetch progress analytics
-        const progressResponse = await fetch(`http://localhost:5000/api/analytics/progress/${userId}`);
-        const progressData = await progressResponse.json();
+        //const progressResponse = await fetch(`http://localhost:5000/api/analytics/progress/${userId}`);
+        //const progressData = await progressResponse.json();
 
         // Fetch path recommendations
-        const recommendationsResponse = await fetch(`http://localhost:5000/api/recommendations/paths/${userId}`);
-        const recommendationsData = await recommendationsResponse.json();
+      //  const recommendationsResponse = await fetch(`http://localhost:5000/api/recommendations/paths/${userId}`);
+       //// const recommendationsData = await recommendationsResponse.json();
 
-        setInsights({
-          progress: progressData,
-          recommendations: recommendationsData,
-          metrics:{}
-        });
+       
      
       } catch (err) {
         setError(prev => ({ ...prev, reflection: (err as Error).message }));
