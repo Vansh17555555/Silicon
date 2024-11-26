@@ -1,13 +1,13 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar, Loader2 } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Calendar, Loader2, TrendingUp, AlertTriangle,Target } from 'lucide-react';
+import { Alert, AlertDescription ,} from '@/components/ui/alert';
 
 // Types and Interfaces
 interface LoadingState {
@@ -26,6 +26,7 @@ interface Analysis {
     score?: number;
   };
   topics: string[];
+  suggestedActions?: string[];
 }
 
 interface Reflection {
@@ -37,11 +38,13 @@ interface Reflection {
   tags?: string[];
   timestamp?: string;
   analysis?: Analysis;
+  futurePrompt?: { content: string };
 }
 
 interface AIRecommendations {
   strategies: string[];
   nextSteps: string[];
+  potentialObstacles?: string[];
 }
 
 interface Milestone {
@@ -56,10 +59,32 @@ interface Milestone {
 
 type Path = 'personal' | 'career' | 'health' | 'creativity';
 
+// Define the Insights type
+interface Insights {
+  progress: any; // Replace 'any' with the actual type if known
+  recommendations: any; // Replace 'any' with the actual type if known
+  metrics: { [key: string]: number };
+  analysis?: { growthTrends?: string[] };
+}
+
+const progressColors = ['#4caf50', '#2196f3', '#ff9800', '#f44336']; // Define your color array
+
 const GrowthTracker: React.FC = () => {
+  const ProgressBar: React.FC<{ path: string; progress: number; color: string }> = ({ path, progress, color }) => {
+    return (
+      <div className="w-full bg-gray-200 rounded-full">
+        <div
+          className="h-2 rounded-full"
+          style={{ width: `${progress}%`, backgroundColor: color }}
+        />
+      </div>
+    );
+  };
   //const [activeTab, setActiveTab] = useState<string>('reflections');
   const [reflections, setReflections] = useState<Reflection[]>([]);
   const [milestones, setMilestones] = useState<Milestone[]>([]);
+  const [insights, setInsights] = useState<Insights | null>(null);
+ 
   const [loading, setLoading] = useState<LoadingState>({
     reflection: false,
     milestone: false
@@ -75,6 +100,33 @@ const GrowthTracker: React.FC = () => {
     setError(prev => ({ ...prev, [type]: null }));
   };
 
+  useEffect(() => {
+    const fetchInsights = async () => {
+      try {
+        // Hardcoded user ID - replace with actual authentication
+        const userId = '507f191e810c19729de860ea';
+        
+        // Fetch progress analytics
+        const progressResponse = await fetch(`http://localhost:5000/api/analytics/progress/${userId}`);
+        const progressData = await progressResponse.json();
+
+        // Fetch path recommendations
+        const recommendationsResponse = await fetch(`http://localhost:5000/api/recommendations/paths/${userId}`);
+        const recommendationsData = await recommendationsResponse.json();
+
+        setInsights({
+          progress: progressData,
+          recommendations: recommendationsData,
+          metrics:{}
+        });
+     
+      } catch (err) {
+        setError(prev => ({ ...prev, reflection: (err as Error).message }));
+      }
+    };
+
+    fetchInsights();
+  }, []);
   // Handle new reflection submission
   const handleReflectionSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
@@ -91,7 +143,7 @@ const GrowthTracker: React.FC = () => {
     };
 
     try {
-      const response = await fetch('https://silicon-backend.onrender.com/api/reflections', {
+      const response = await fetch('http://localhost:5000/api/reflections', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(reflection),
@@ -105,10 +157,7 @@ const GrowthTracker: React.FC = () => {
       setReflections(prev => [data, ...prev]);
       (e.target as HTMLFormElement).reset();
     } catch (err) {
-      setError(prev => ({
-        ...prev,
-        reflection: err instanceof Error ? err.message : 'Failed to submit reflection'
-      }));
+      setError(prev => ({ ...prev, reflection: (err as Error).message }));
     } finally {
       setLoading(prev => ({ ...prev, reflection: false }));
     }
@@ -130,7 +179,7 @@ const GrowthTracker: React.FC = () => {
     };
 
     try {
-      const response = await fetch('https://silicon-backend.onrender.com/api/milestones', {
+      const response = await fetch('http://localhost:5000/api/milestones', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(milestone),
@@ -161,10 +210,10 @@ const GrowthTracker: React.FC = () => {
       </header>
 
       <Tabs defaultValue="reflections" className="space-y-6">
-        <TabsList className="grid grid-cols-3 w-full">
+        <TabsList className="grid grid-cols-2 w-full">
           <TabsTrigger value="reflections">Daily Reflections</TabsTrigger>
           <TabsTrigger value="milestones">Milestones</TabsTrigger>
-          <TabsTrigger value="insights">AI Insights</TabsTrigger>
+       
         </TabsList>
 
         {/* Reflections Tab */}
@@ -180,15 +229,15 @@ const GrowthTracker: React.FC = () => {
                   <AlertDescription>{error.reflection}</AlertDescription>
                 </Alert>
               )}
-              <form onSubmit={handleReflectionSubmit} className="space-y-4">
+              <form onSubmit={handleReflectionSubmit} className="space-y-4 z-30">
                 <div>
                   <Select name="path" required>
                     <SelectTrigger>
                       <SelectValue placeholder="Choose a path" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className='z-10 bg-white'>
                       {paths.map((path) => (
-                        <SelectItem key={path} value={path}>
+                        <SelectItem key={path} value={path} className='bg-white'>
                           {path.charAt(0).toUpperCase() + path.slice(1)}
                         </SelectItem>
                       ))}
@@ -242,178 +291,169 @@ const GrowthTracker: React.FC = () => {
                       ))}
                     </div>
                   )}
-                  {reflection.analysis && (
-                    <div className="mt-4 pt-4 border-t">
-                      <h4 className="font-semibold mb-2">AI Analysis</h4>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <p className="text-sm font-medium">Sentiment</p>
-                          <p className="text-sm text-gray-600">
-                            {reflection.analysis.sentiment.label}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium">Key Topics</p>
-                          <p className="text-sm text-gray-600">
-                            {reflection.analysis.topics.join(', ')}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
+             {reflection.analysis && (
+  <div className="mt-4 pt-4 border-t">
+    <h4 className="font-semibold mb-2">AI Analysis</h4>
+    <div className="grid grid-cols-2 gap-4">
+      <div>
+        <p className="text-sm font-medium">Sentiment</p>
+        <p className="text-sm text-gray-600">
+          {reflection.analysis.sentiment.label}
+        </p>
+      </div>
+      <div>
+        <p className="text-sm font-medium">Key Topics</p>
+        <p className="text-sm text-gray-600">
+          {reflection.analysis.topics.join(', ')}
+        </p>
+      </div>
+    </div>
+    {/* Destructure suggestedActions */}
+    {reflection.analysis.suggestedActions && (
+      <div className="mt-4">
+        <p className="text-sm font-medium">Suggested Actions</p>
+        <ul className="text-sm text-gray-600">
+          {reflection.analysis.suggestedActions.map((action, index) => (
+            <li key={index}>{action}</li>
+          ))}
+        </ul>
+      </div>
+    )}
+  </div>
+)}
+{reflection.futurePrompt && (
+                  <div className="mt-6 pt-4 border-t">
+                    <h4 className="font-semibold mb-2">Future Path - Key Questions</h4>
+                    <p className="text-sm text-gray-600">{reflection.futurePrompt.content}</p>
+                  </div>
+                )}
+
                 </CardContent>
               </Card>
             ))}
           </div>
-        </TabsContent>
+              </TabsContent>
 
         {/* Milestones Tab */}
         <TabsContent value="milestones">
-          <Card>
-            <CardHeader>
-              <CardTitle>New Milestone</CardTitle>
-              <CardDescription>Set your next goal</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {error.milestone && (
-                <Alert variant="destructive" className="mb-4">
-                  <AlertDescription>{error.milestone}</AlertDescription>
-                </Alert>
-              )}
-              <form onSubmit={handleMilestoneSubmit} className="space-y-4">
-                <Input name="title" placeholder="Milestone Title" required />
-                <Textarea
-                  name="description"
-                  placeholder="Describe your milestone"
-                  required
-                />
-                <div className="grid grid-cols-2 gap-4">
-                  <Select name="path" required>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Choose a path" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {paths.map((path) => (
-                        <SelectItem key={path} value={path}>
-                          {path.charAt(0).toUpperCase() + path.slice(1)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Input name="targetDate" type="date" required className="w-full" />
-                </div>
-                <Button 
-                  type="submit" 
-                  className="w-full"
-                  disabled={loading.milestone}
-                >
-                  {loading.milestone ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Creating...
-                    </>
-                  ) : (
-                    'Create Milestone'
-                  )}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
+  <Card>
+    <CardHeader>
+      <CardTitle>New Milestone</CardTitle>
+      <CardDescription>Set your next goal</CardDescription>
+    </CardHeader>
+    <CardContent>
+      {error.milestone && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertDescription>{error.milestone}</AlertDescription>
+        </Alert>
+      )}
+      <form onSubmit={handleMilestoneSubmit} className="space-y-4">
+        <Input name="title" placeholder="Milestone Title" required />
+        <Textarea
+          name="description"
+          placeholder="Describe your milestone"
+          required
+        />
+        <div className="grid grid-cols-2 gap-4">
+          <Select name="path" required>
+            <SelectTrigger>
+              <SelectValue placeholder="Choose a path" />
+            </SelectTrigger>
+            <SelectContent>
+              {paths.map((path) => (
+                <SelectItem key={path} value={path}>
+                  {path.charAt(0).toUpperCase() + path.slice(1)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Input name="targetDate" type="date" required className="w-full" />
+        </div>
+        <Button 
+          type="submit" 
+          className="w-full"
+          disabled={loading.milestone}
+        >
+          {loading.milestone ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Creating...
+            </>
+          ) : (
+            'Create Milestone'
+          )}
+        </Button>
+      </form>
+    </CardContent>
+  </Card>
 
-          <div className="mt-6 space-y-4">
-            {milestones.map((milestone, index) => (
-              <Card key={milestone.id || index}>
-                <CardHeader>
-                  <div className="flex justify-between items-center">
-                    <CardTitle>{milestone.title}</CardTitle>
-                    <span className="text-sm text-gray-500 flex items-center gap-2">
-                      <Calendar className="w-4 h-4" />
-                      {new Date(milestone.targetDate).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <CardDescription>{milestone.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {milestone.aiRecommendations && (
-                    <div className="space-y-3">
-                      <div>
-                        <h4 className="font-semibold mb-1">Strategies</h4>
-                        <ul className="list-disc pl-5 text-sm">
-                          {milestone.aiRecommendations.strategies.length > 0 ? (
-                            milestone.aiRecommendations.strategies.map((strategy, i) => (
-                              <li key={i}>{strategy}</li>
-                            ))
-                          ) : (
-                            <li>No strategies available.</li>
-                          )}
-                        </ul>
-                      </div>
-                      <div>
-                        <h4 className="font-semibold mb-1">Next Steps</h4>
-                        <ul className="list-disc pl-5 text-sm">
-                          {milestone.aiRecommendations.nextSteps.length > 0 ? (
-                            milestone.aiRecommendations.nextSteps.map((step, i) => (
-                              <li key={i}>{step}</li>
-                            ))
-                          ) : (
-                            <li>No next steps available.</li>
-                          )}
-                        </ul>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
+  <div className="mt-6 space-y-4">
+    {milestones.map((milestone, index) => (
+      <Card key={milestone.id || index}>
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <CardTitle>{milestone.title}</CardTitle>
+            <span className="text-sm text-gray-500 flex items-center gap-2">
+              <Calendar className="w-4 h-4" />
+              {new Date(milestone.targetDate).toLocaleDateString()}
+            </span>
           </div>
-        </TabsContent>
-
-        {/* Insights Tab */}
-        <TabsContent value="insights">
-          <Card>
-            <CardHeader>
-              <CardTitle>AI-Powered Insights</CardTitle>
-              <CardDescription>
-                Personalized analysis of your growth journey
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-semibold mb-3">Progress Overview</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    {paths.map((path) => (
-                      <Card key={path}>
-                        <CardHeader>
-                          <CardTitle className="text-base capitalize">{path}</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="h-2 bg-gray-200 rounded">
-                            <div
-                              className="h-full bg-blue-500 rounded"
-                              style={{
-                                width: `${Math.random() * 100}%`,
-                              }}
-                            />
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold mb-3">Recent Patterns</h3>
-                  <div className="space-y-2">
-                    <p className="text-sm text-gray-600">
-                      Analysis of your recent reflections and milestones will appear here.
-                    </p>
-                  </div>
-                </div>
+          <CardDescription>{milestone.description}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {milestone.aiRecommendations && (
+            <div className="space-y-3">
+              {/* Strategies Section */}
+              <div>
+                <h4 className="font-semibold mb-1">Strategies</h4>
+                <ul className="list-disc pl-5 text-sm">
+                  {milestone.aiRecommendations.strategies?.length > 0 ? (
+                    milestone.aiRecommendations.strategies.map((strategy, i) => (
+                      <li key={i}>{strategy}</li>
+                    ))
+                  ) : (
+                    <li>No strategies available.</li>
+                  )}
+                </ul>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+              
+              {/* Potential Obstacles Section */}
+              <div>
+                <h4 className="font-semibold mb-1">Potential Obstacles</h4>
+                <ul className="list-disc pl-5 text-sm">
+                  {milestone.aiRecommendations?.potentialObstacles?.length ? (
+                    milestone.aiRecommendations.potentialObstacles.map((obstacle, i) => (
+                      <li key={i}>{obstacle}</li>
+                    ))
+                  ) : (
+                    <li>No potential obstacles available.</li>
+                  )}
+                </ul>
+              </div>
+              
+              {/* Next Steps Section */}
+              <div>
+                <h4 className="font-semibold mb-1">Next Steps</h4>
+                <ul className="list-disc pl-5 text-sm">
+                  {milestone.aiRecommendations.nextSteps?.length > 0 ? (
+                    milestone.aiRecommendations.nextSteps.map((step, i) => (
+                      <li key={i}>{step}</li>
+                    ))
+                  ) : (
+                    <li>No next steps available.</li>
+                  )}
+                </ul>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    ))}
+  </div>
+</TabsContent>
+
+
+
       </Tabs>
     </div>
   );
